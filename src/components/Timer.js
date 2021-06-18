@@ -7,14 +7,21 @@ function Timer () {
   const [isTimer, setIsTimer] = useState(false)
   const [clearTimer, setClearTimer] = useState(false)
   const [userCounter, setUserCounter] = useState(0)
+  const [isPauseDisabled, setIsPauseDisabled] = useState(true)
+  const [isRefreshDisabled, setIsRefreshDisabled] = useState(true)
+  const [isSaveDisabled, setIsSaveDisabled] = useState(true)
+  const [isUnsetDisabled, setIsUnSetDisabled] = useState(true)
+  const [username, setUsername] = useState('')
+  const [timerButtonText, setTimerButtonText] = useState('Start')
+  const [timerButtonColor, setTimerButtonColor] = useState('primary')
 
   let timers = localStorage.getItem('timer')
   timers = timers ? JSON.parse(timers) : null
-  const [milliSeconds, setMilliSeconds] = useState(timers && timers.milliSeconds ? +timers.milliSeconds : 0)
-  const [seconds, setSeconds] = useState(timers && timers.seconds ? +timers.seconds : 0)
-  const [minutes, setMinutes] = useState(timers && timers.minutes ? +timers.minutes : 0)
-  const [hours, setHours] = useState(timers && timers.hours ? +timers.hours : 0)
-  const [days, setDays] = useState(timers && timers.days ? +timers.days : 0)
+  const [milliSeconds, setMilliSeconds] = useState(timers && timers.milliSeconds ? +timers.milliSeconds : 10)
+  const [seconds, setSeconds] = useState(timers && timers.seconds ? +timers.seconds : 10)
+  const [minutes, setMinutes] = useState(timers && timers.minutes ? +timers.minutes : 10)
+  const [hours, setHours] = useState(timers && timers.hours ? +timers.hours : 10)
+  const [days, setDays] = useState(timers && timers.days ? +timers.days : 10)
 
 
   const displayTimer = _ => {
@@ -56,6 +63,8 @@ function Timer () {
     }
   }
   const startTimer = () => {
+    setTimerButtonText('Stop')
+    setTimerButtonColor('secondary')
     setIsTimer(true)
     const interval = 10
     const counterFunc = counterClosure(interval)
@@ -64,22 +73,31 @@ function Timer () {
       getConvertedTimer(count)
     }, interval)
     setClearTimer(timerInterval)
+    setIsPauseDisabled(false)
+    setIsRefreshDisabled(false)
   }
   const stopTimer = () => {
     clearInterval(clearTimer)
     setIsTimer(false)
     setUserCounter(0)
+    setTimerButtonText('Start')
+    setTimerButtonColor('primary')
+    setIsPauseDisabled(true)
+    setIsRefreshDisabled(true)
   }
   const pauseTimer = () => {
-    localStorage.clear()
   }
   const refreshTimer = () => {
-    localStorage.clear()
   }
   const unset = () => {
     localStorage.clear()
   }
-  const save = (username) => {
+  const saveChange = (value) => {
+    setUsername(value)
+    setIsSaveDisabled(false)
+    setIsUnSetDisabled(false)
+  }
+  const save = () => {
     localStorage.setItem(username, {
       milliSeconds,
       seconds,
@@ -87,6 +105,8 @@ function Timer () {
       hours,
       days
     })
+    setUsername('')
+    setIsSaveDisabled(false)
   }
   return (
     <div style={{
@@ -103,11 +123,11 @@ function Timer () {
         justifyContent: 'space-evenly',
         width: '500px',
       }}>
-        <Button variant="contained" color="primary" onClick={() => {
+        <Button variant="contained" color={timerButtonColor} onClick={() => {
           isTimer ? stopTimer() : startTimer()
-        }}>{isTimer ? "Stop" : "Start"}</Button>
-        <Button variant="contained" onClick={() => pauseTimer()}>Pause</Button>
-        <Button variant="contained" onClick={() => refreshTimer()}>Refresh</Button>
+        }}>{timerButtonText}</Button>
+        <Button variant="contained" onClick={() => pauseTimer()} disabled={isPauseDisabled}>Pause</Button>
+        <Button variant="contained" onClick={() => refreshTimer()} disabled={isRefreshDisabled}>Refresh</Button>
       </div>
       <div><label htmlFor="">{userTimer}</label></div>
       <div style={{
@@ -116,9 +136,9 @@ function Timer () {
         justifyContent: 'space-evenly',
         width: '500px',
       }}>
-        <input type="text" name="timer" placeholder="enter timer name" />
-        <Button variant="contained" color="primary" onClick={(e) => { save(e.target.value) }}> Save </Button>
-        <Button variant="contained" color="primary" onClick={(e) => { unset(e.target.value) }}> Unset </Button>
+        <input type="text" name="timer" placeholder="enter timer name" value={username} onChange={(e) => saveChange(e.target.value)} />
+        <Button variant="contained" color="primary" onClick={(e) => { save() }} disabled={isSaveDisabled}> Save </Button>
+        <Button variant="contained" color="secondary" onClick={(e) => { unset() }} disabled={isUnsetDisabled}> Unset </Button>
       </div>
     </div>
   );
