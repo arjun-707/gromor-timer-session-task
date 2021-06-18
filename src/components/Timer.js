@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@material-ui/core';
 import { counterClosure, print, inTens } from '../utils'
 
@@ -15,13 +15,14 @@ function Timer () {
   const [minutes, setMinutes] = useState(timers && timers.minutes ? +timers.minutes : 0)
   const [hours, setHours] = useState(timers && timers.hours ? +timers.hours : 0)
   const [days, setDays] = useState(timers && timers.days ? +timers.days : 0)
-  
-  displayTimer()
-  
+
+
   const displayTimer = _ => {
     const time = `${inTens(hours)}:${inTens(minutes)}:${inTens(seconds)}.${inTens(milliSeconds)}`
     setUserTimer(time)
   }
+  useEffect(displayTimer, [])
+
   const getConvertedTimer = _ => {
     const milliSec = 1000
     if (_ < milliSec) {
