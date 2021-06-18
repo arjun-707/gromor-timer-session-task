@@ -8,12 +8,16 @@ function Timer () {
   const [clearTimer, setClearTimer] = useState(false)
   const [userCounter, setUserCounter] = useState(0)
 
-  const [milliSeconds, setMilliSeconds] = useState(0)
-  const [seconds, setSeconds] = useState(0)
-  const [minutes, setMinutes] = useState(0)
-  const [hours, setHours] = useState(0)
-  const [days, setDays] = useState(0)
-
+  let timers = localStorage.getItem('timer')
+  timers = timers ? JSON.parse(timers) : null
+  const [milliSeconds, setMilliSeconds] = useState(timers && timers.milliSeconds ? +timers.milliSeconds : 0)
+  const [seconds, setSeconds] = useState(timers && timers.seconds ? +timers.seconds : 0)
+  const [minutes, setMinutes] = useState(timers && timers.minutes ? +timers.minutes : 0)
+  const [hours, setHours] = useState(timers && timers.hours ? +timers.hours : 0)
+  const [days, setDays] = useState(timers && timers.days ? +timers.days : 0)
+  
+  displayTimer()
+  
   const displayTimer = _ => {
     const time = `${inTens(hours)}:${inTens(minutes)}:${inTens(seconds)}.${inTens(milliSeconds)}`
     setUserTimer(time)
