@@ -1,23 +1,11 @@
 import { useState, useEffect } from 'react'
-import { makeStyles } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
-import { counterClosure, print, inTens } from '../utils'
-
-const useStyles = makeStyles({
-  table: {
-    minWidth: 650,
-  },
-});
+import { print, inTens } from '../utils'
+import { ListTimers } from './ListTimers';
+import { SaveTimers } from './SaveTimers';
+import { DisplayTimer } from './DisplayTimer';
 
 function Timer () {
-  const classes = useStyles();
   const [userTimer, setUserTimer] = useState('00:00:00.000')
   const [isTimer, setIsTimer] = useState(false)
   const [clearTimer, setClearTimer] = useState(false)
@@ -30,6 +18,7 @@ function Timer () {
   const [timerButtonText, setTimerButtonText] = useState('Start')
   const [timerButtonColor, setTimerButtonColor] = useState('primary')
   const [rows, setRows] = useState([])
+  const [counter, setCounter] = useState(0)
 
   let timers = localStorage.getItem('timer')
   timers = timers ? JSON.parse(timers) : null
@@ -51,53 +40,19 @@ function Timer () {
   }
   useEffect(displayTimer, [])
 
-  const getConvertedTimer = _ => {
-    const milliSec = 1000
-    if (_ < milliSec) {
-      console.log(_, 'count')
-      setMilliSeconds(_)
-    }
-    else {
-      setSeconds(s => s + 1)
-      setMilliSeconds(0)
-      if (seconds > 59) {
-        setMinutes(m => m + 1)
-        setSeconds(0)
-        if (minutes > 59) {
-          // localStorage.setItem('timer', {
-          //   milliSeconds,
-          //   seconds,
-          //   minutes,
-          //   hours,
-          //   days
-          // })
-          setHours(h => h + 1)
-          setMinutes(0)
-          if (hours > 24) {
-            setDays(d => d + 1)
-            setHours(0)
-          }
-        }
-      }
-      // print('ssss', seconds)
-      displayTimer()
-    }
-  }
-  const startTimer = () => {
+  const startTimer = _ => {
     setTimerButtonText('Stop')
     setTimerButtonColor('secondary')
     setIsTimer(true)
-    const interval = 10
-    const counterFunc = counterClosure(interval)
-    const timerInterval = setInterval(() => {
-      let count = counterFunc()
-      getConvertedTimer(count)
+    const interval = 100
+    const timerInterval = setInterval(_ => {
+      setCounter(c => c + interval)
     }, interval)
     setClearTimer(timerInterval)
     setIsPauseDisabled(false)
     setIsRefreshDisabled(false)
   }
-  const stopTimer = () => {
+  const stopTimer = _ => {
     clearInterval(clearTimer)
     setIsTimer(false)
     setUserCounter(0)
@@ -106,11 +61,11 @@ function Timer () {
     setIsPauseDisabled(true)
     setIsRefreshDisabled(true)
   }
-  const pauseTimer = () => {
+  const pauseTimer = _ => {
   }
-  const refreshTimer = () => {
+  const refreshTimer = _ => {
   }
-  const unset = () => {
+  const unset = _ => {
     localStorage.clear()
   }
   const saveChange = (value) => {
@@ -118,7 +73,7 @@ function Timer () {
     setIsSaveDisabled(false)
     setIsUnSetDisabled(false)
   }
-  const save = () => {
+  const save = _ => {
     let oldList = localStorage.getItem('users')
     if (oldList) {
       oldList = JSON.parse(oldList)
@@ -164,54 +119,29 @@ function Timer () {
         justifyContent: 'space-evenly',
         width: '500px',
       }}>
-        <Button variant="contained" color={timerButtonColor} onClick={() => {
+        <Button variant="contained" color={timerButtonColor} onClick={_ => {
           isTimer ? stopTimer() : startTimer()
         }}>{timerButtonText}</Button>
-        <Button variant="contained" onClick={() => pauseTimer()} disabled={isPauseDisabled}>Pause</Button>
-        <Button variant="contained" onClick={() => refreshTimer()} disabled={isRefreshDisabled}>Refresh</Button>
+        <Button variant="contained" onClick={_ => pauseTimer()} disabled={isPauseDisabled}>Pause</Button>
+        <Button variant="contained" onClick={_ => refreshTimer()} disabled={isRefreshDisabled}>Refresh</Button>
       </div>
-      <div style={{
-        fontSize: '36px'
-      }}><h1>{userTimer}</h1></div>
-      <div style={{
-        display: 'flex',
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
-        width: '500px',
-      }}>
-        <input type="text" name="timer" placeholder="enter timer name" value={username} onChange={(e) => saveChange(e.target.value)} />
-        <Button variant="contained" color="primary" onClick={(e) => { save() }} disabled={isSaveDisabled}> Save </Button>
-        <Button variant="contained" color="secondary" onClick={(e) => { unset() }} disabled={isUnsetDisabled}> Unset </Button>
-      </div>
-      <div>
-        <TableContainer component={Paper}>
-          <Table className={classes.table} aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Timer Name</TableCell>
-                <TableCell align="right">Time</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {
-                rows.length ? rows.map((row, i) => (
-                  <TableRow key={`${row.username}_${i}`}>
-                    <TableCell component="th" scope="row">
-                      {row.username}
-                    </TableCell>
-                    <TableCell align="right">{`${inTens(row.hours)}:${inTens(row.minutes)}:${inTens(row.seconds)}.${inTens(row.milliSeconds)}`}</TableCell>
-                  </TableRow>
-                )) :
-                  <TableRow>
-                    <TableCell component="th" colSpan="2">
-                      No Data Available
-                    </TableCell>
-                  </TableRow>
-              }
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </div>
+      <DisplayTimer
+        isTimer={isTimer}
+        counter={counter}
+        setCounter={setCounter}
+        days={days}
+        hours={hours}
+        minutes={minutes}
+        seconds={seconds}
+        milliSeconds={milliSeconds}
+        setDays={setDays}
+        setHours={setHours}
+        setMinutes={setMinutes}
+        setSeconds={setSeconds}
+        setMilliSeconds={setMilliSeconds}
+      />
+      <SaveTimers username={username} saveChange={saveChange} save={save} unset={unset} isSaveDisabled={isSaveDisabled} isUnsetDisabled={isUnsetDisabled} />
+      <ListTimers rows={rows} />
     </div>
   );
 }
