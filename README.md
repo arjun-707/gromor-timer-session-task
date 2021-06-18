@@ -1,6 +1,6 @@
-# Stop Watch
+# Timer Session
 
-Stop watch timer ReactJS Webpage
+Timer Session ReactJS Webpage
 
 ## Run
  * `npm i`
