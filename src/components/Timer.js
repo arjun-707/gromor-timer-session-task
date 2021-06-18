@@ -17,11 +17,11 @@ function Timer () {
 
   let timers = localStorage.getItem('timer')
   timers = timers ? JSON.parse(timers) : null
-  const [milliSeconds, setMilliSeconds] = useState(timers && timers.milliSeconds ? +timers.milliSeconds : 10)
-  const [seconds, setSeconds] = useState(timers && timers.seconds ? +timers.seconds : 10)
-  const [minutes, setMinutes] = useState(timers && timers.minutes ? +timers.minutes : 10)
-  const [hours, setHours] = useState(timers && timers.hours ? +timers.hours : 10)
-  const [days, setDays] = useState(timers && timers.days ? +timers.days : 10)
+  const [milliSeconds, setMilliSeconds] = useState(timers && timers.milliSeconds ? +timers.milliSeconds : 0)
+  const [seconds, setSeconds] = useState(timers && timers.seconds ? +timers.seconds : 0)
+  const [minutes, setMinutes] = useState(timers && timers.minutes ? +timers.minutes : 0)
+  const [hours, setHours] = useState(timers && timers.hours ? +timers.hours : 0)
+  const [days, setDays] = useState(timers && timers.days ? +timers.days : 0)
 
 
   const displayTimer = _ => {
@@ -129,7 +129,9 @@ function Timer () {
         <Button variant="contained" onClick={() => pauseTimer()} disabled={isPauseDisabled}>Pause</Button>
         <Button variant="contained" onClick={() => refreshTimer()} disabled={isRefreshDisabled}>Refresh</Button>
       </div>
-      <div><label htmlFor="">{userTimer}</label></div>
+      <div style={{
+        fontSize: '36px'
+      }}><h1>{userTimer}</h1></div>
       <div style={{
         display: 'flex',
         flexDirection: 'row',
