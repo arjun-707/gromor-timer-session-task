@@ -6,14 +6,11 @@ import { SaveTimers } from './SaveTimers';
 import { DisplayTimer } from './DisplayTimer';
 
 function Timer () {
-  const [userTimer, setUserTimer] = useState('00:00:00.000')
   const [isTimer, setIsTimer] = useState(false)
   const [clearTimer, setClearTimer] = useState(false)
-  const [userCounter, setUserCounter] = useState(0)
   const [isPauseDisabled, setIsPauseDisabled] = useState(true)
   const [isRefreshDisabled, setIsRefreshDisabled] = useState(true)
   const [isSaveDisabled, setIsSaveDisabled] = useState(true)
-  const [isUnsetDisabled, setIsUnSetDisabled] = useState(true)
   const [username, setUsername] = useState('')
   const [timerButtonText, setTimerButtonText] = useState('Start')
   const [timerButtonColor, setTimerButtonColor] = useState('primary')
@@ -30,8 +27,6 @@ function Timer () {
 
 
   const displayTimer = _ => {
-    const time = `${inTens(hours)}:${inTens(minutes)}:${inTens(seconds)}.${inTens(milliSeconds)}`
-    setUserTimer(time)
     let oldList = localStorage.getItem('users')
     if (oldList) {
       oldList = JSON.parse(oldList)
@@ -57,32 +52,52 @@ function Timer () {
   const stopTimer = _ => {
     clearInterval(clearTimer)
     setIsTimer(false)
-    setUserCounter(0)
     setTimerButtonText('Start')
     setTimerButtonColor('primary')
     setIsPauseDisabled(true)
     setIsRefreshDisabled(true)
+    setMilliSeconds(0)
+    setSeconds(0)
+    setMinutes(0)
+    setHours(0)
+    setDays(0)
   }
   const pauseTimer = _ => {
     isPause = true
+    setCounter(0)
     setIsTimer(false)
     clearInterval(clearTimer)
     setIsPauseDisabled(true)
     setTimerButtonText('Resume')
     setTimerButtonColor('primary')
+    localStorage.setItem('timer', JSON.stringify({
+      milliSeconds,
+      seconds,
+      minutes,
+      hours,
+      days
+    }))
   }
   const refreshTimer = _ => {
-
-  }
-  const unset = _ => {
-    localStorage.clear()
+    setCounter(0)
+    clearInterval(clearTimer)
+    setIsTimer(false)
+    setTimerButtonText('Start')
+    setTimerButtonColor('primary')
+    setIsPauseDisabled(true)
+    setIsRefreshDisabled(true)
+    setMilliSeconds(0)
+    setSeconds(0)
+    setMinutes(0)
+    setHours(0)
+    setDays(0)
+    localStorage.removeItem('timer')
   }
   const saveChange = (value) => {
     setUsername(value)
     setIsSaveDisabled(false)
-    setIsUnSetDisabled(false)
   }
-  const save = _ => {
+  const saveUserTimer = _ => {
     let oldList = localStorage.getItem('users')
     if (oldList) {
       oldList = JSON.parse(oldList)
@@ -149,7 +164,7 @@ function Timer () {
         setSeconds={setSeconds}
         setMilliSeconds={setMilliSeconds}
       />
-      <SaveTimers username={username} saveChange={saveChange} save={save} unset={unset} isSaveDisabled={isSaveDisabled} isUnsetDisabled={isUnsetDisabled} />
+      <SaveTimers username={username} saveChange={saveChange} saveUserTimer={saveUserTimer} isSaveDisabled={isSaveDisabled} />
       <ListTimers rows={rows} />
     </div>
   );
