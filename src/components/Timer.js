@@ -19,7 +19,7 @@ function Timer () {
   const [timerButtonColor, setTimerButtonColor] = useState('primary')
   const [rows, setRows] = useState([])
   const [counter, setCounter] = useState(0)
-
+  let isPause = true
   let timers = localStorage.getItem('timer')
   timers = timers ? JSON.parse(timers) : null
   const [milliSeconds, setMilliSeconds] = useState(timers && timers.milliSeconds ? +timers.milliSeconds : 0)
@@ -45,8 +45,10 @@ function Timer () {
     setTimerButtonColor('secondary')
     setIsTimer(true)
     const interval = 100
+    isPause = false
     const timerInterval = setInterval(_ => {
-      setCounter(c => c + interval)
+      if (!isPause)
+        setCounter(c => c + interval)
     }, interval)
     setClearTimer(timerInterval)
     setIsPauseDisabled(false)
@@ -62,8 +64,15 @@ function Timer () {
     setIsRefreshDisabled(true)
   }
   const pauseTimer = _ => {
+    isPause = true
+    setIsTimer(false)
+    clearInterval(clearTimer)
+    setIsPauseDisabled(true)
+    setTimerButtonText('Resume')
+    setTimerButtonColor('primary')
   }
   const refreshTimer = _ => {
+
   }
   const unset = _ => {
     localStorage.clear()
