@@ -1,8 +1,23 @@
 import { useState, useEffect } from 'react'
+import { makeStyles } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import Paper from '@material-ui/core/Paper';
 import { counterClosure, print, inTens } from '../utils'
 
+const useStyles = makeStyles({
+  table: {
+    minWidth: 650,
+  },
+});
+
 function Timer () {
+  const classes = useStyles();
   const [userTimer, setUserTimer] = useState('00:00:00.000')
   const [isTimer, setIsTimer] = useState(false)
   const [clearTimer, setClearTimer] = useState(false)
@@ -14,6 +29,7 @@ function Timer () {
   const [username, setUsername] = useState('')
   const [timerButtonText, setTimerButtonText] = useState('Start')
   const [timerButtonColor, setTimerButtonColor] = useState('primary')
+  const [rows, setRows] = useState([])
 
   let timers = localStorage.getItem('timer')
   timers = timers ? JSON.parse(timers) : null
@@ -27,6 +43,11 @@ function Timer () {
   const displayTimer = _ => {
     const time = `${inTens(hours)}:${inTens(minutes)}:${inTens(seconds)}.${inTens(milliSeconds)}`
     setUserTimer(time)
+    let oldList = localStorage.getItem('users')
+    if (oldList) {
+      oldList = JSON.parse(oldList)
+      setRows(oldList)
+    }
   }
   useEffect(displayTimer, [])
 
@@ -43,13 +64,13 @@ function Timer () {
         setMinutes(m => m + 1)
         setSeconds(0)
         if (minutes > 59) {
-          localStorage.setItem('timer', {
-            milliSeconds,
-            seconds,
-            minutes,
-            hours,
-            days
-          })
+          // localStorage.setItem('timer', {
+          //   milliSeconds,
+          //   seconds,
+          //   minutes,
+          //   hours,
+          //   days
+          // })
           setHours(h => h + 1)
           setMinutes(0)
           if (hours > 24) {
@@ -98,13 +119,33 @@ function Timer () {
     setIsUnSetDisabled(false)
   }
   const save = () => {
-    localStorage.setItem(username, {
-      milliSeconds,
-      seconds,
-      minutes,
-      hours,
-      days
-    })
+    let oldList = localStorage.getItem('users')
+    if (oldList) {
+      oldList = JSON.parse(oldList)
+      oldList.push({
+        username,
+        milliSeconds,
+        seconds,
+        minutes,
+        hours,
+        days
+      })
+      localStorage.setItem('users', JSON.stringify(oldList))
+      setRows(oldList)
+    }
+    else {
+      oldList = []
+      oldList.push({
+        username,
+        milliSeconds,
+        seconds,
+        minutes,
+        hours,
+        days
+      })
+      localStorage.setItem('users', JSON.stringify(oldList))
+      setRows(oldList)
+    }
     setUsername('')
     setIsSaveDisabled(false)
   }
@@ -141,6 +182,35 @@ function Timer () {
         <input type="text" name="timer" placeholder="enter timer name" value={username} onChange={(e) => saveChange(e.target.value)} />
         <Button variant="contained" color="primary" onClick={(e) => { save() }} disabled={isSaveDisabled}> Save </Button>
         <Button variant="contained" color="secondary" onClick={(e) => { unset() }} disabled={isUnsetDisabled}> Unset </Button>
+      </div>
+      <div>
+        <TableContainer component={Paper}>
+          <Table className={classes.table} aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                <TableCell>Timer Name</TableCell>
+                <TableCell align="right">Time</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {
+                rows.length ? rows.map((row, i) => (
+                  <TableRow key={`${row.username}_${i}`}>
+                    <TableCell component="th" scope="row">
+                      {row.username}
+                    </TableCell>
+                    <TableCell align="right">{`${inTens(row.hours)}:${inTens(row.minutes)}:${inTens(row.seconds)}.${inTens(row.milliSeconds)}`}</TableCell>
+                  </TableRow>
+                )) :
+                  <TableRow>
+                    <TableCell component="th" colSpan="2">
+                      No Data Available
+                    </TableCell>
+                  </TableRow>
+              }
+            </TableBody>
+          </Table>
+        </TableContainer>
       </div>
     </div>
   );
